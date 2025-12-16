@@ -1,52 +1,17 @@
+import 'dotenv/config';
 import { App } from '@slack/bolt';
 
-/**
- * This sample Slack application uses Socket Mode.
- * For the companion getting started setup guide, see:
- * https://docs.slack.dev/tools/bolt-js/getting-started/
- */
-
-// Initializes your app with your bot token and app token
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN
 });
 
-// Listens to incoming messages that contain "hello"
-app.message('hello', async ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
-  await say({
-    blocks: [
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
-          "text": `Hey there <@${message.user}>!`
-        },
-        "accessory": {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "Click Me"
-          },
-          "action_id": "button_click"
-        }
-      }
-    ],
-    text: `Hey there <@${message.user}>!`
-  });
-});
-
-app.action('button_click', async ({ body, ack, say }) => {
-  // Acknowledge the action
-  await ack();
-  await say(`<@${body.user.id}> clicked the button`);
-});
+const urlApi = process.env.API_URL;
 
 app.command('/list-activities', async ({ body, ack, say }) => {
   await ack();
-  fetch(`https://mock.apidog.com/m1/1149413-1142048-default/program/1/activity`, {
+  fetch(`${urlApi}/program/1/activity`, {
     method: 'GET',
     headers: {
       'x-slack-user-id': '12345',
@@ -57,6 +22,91 @@ app.command('/list-activities', async ({ body, ack, say }) => {
       say(`Data: ${JSON.stringify(data)}`);
     });
 });
+
+app.command('/list-programs', async ({ command, ack, say }) => {
+  await ack();
+  fetch(`${urlApi}/programs`, {
+    method: 'GET',
+    headers: {
+      'x-slack-user-id': command.user_id,
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      const blocks = [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "Created Programs",
+            emoji: true
+          }
+        },
+        {
+          type: "divider"
+        }
+      ];
+
+      data.forEach(program => {
+        blocks.push({
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*${program.name}*\n:hash: Channel: <#${program.slack_channel}>\n:calendar: Start: ${new Date(program.start_date).toLocaleDateString()}\n:checkered_flag: End: ${new Date(program.end_date).toLocaleDateString()}`
+          }
+        });
+        blocks.push({
+          type: "divider"
+        });
+      });
+
+      say({ blocks });
+    });
+});
+
+app.command('/create-program', async ({ command, ack, say }) => {
+  await ack();
+  const programName = command.text;
+  const userId = command.user_id;
+
+  if (!programName) {
+    await say("Please provide a program name. Usage: `/create-program <name>`");
+    return;
+  }
+
+  const startDate = new Date();
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 30);
+
+  const payload = {
+    name: programName,
+    slack_channel: command.channel_name,
+    start_date: startDate.toISOString(),
+    end_date: endDate.toISOString(),
+  };
+
+  try {
+    const response = await fetch(`${urlApi}/programs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-slack-user-id': userId,
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      await say(`Error creating program: API returned ${response.status}`);
+      return;
+    }
+
+    await say(`Program ${programName} created successfully!`);
+  } catch (error) {
+    console.error(error);
+    await say(`Failed to create program: ${error.message}`);
+  }
+});
+
 
 (async () => {
   // Start your app

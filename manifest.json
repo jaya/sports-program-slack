@@ -14,8 +14,16 @@
     },
     "slash_commands": [
       {
+        "command": "/list-programs",
+        "description": "List all programs"
+      },
+      {
         "command": "/list-activities",
-        "description": "Says hello"
+        "description": "List all activities"
+      },
+      {
+        "command": "/create-program",
+        "description": "Create a new program"
       }
     ]
   },
