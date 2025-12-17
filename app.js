@@ -60,7 +60,7 @@ app.command('/list-programs', async ({ command, ack, say }) => {
         });
       });
 
-      say({ blocks });
+      say({ blocks, text: "List of created programs" });
     });
 });
 
@@ -96,11 +96,40 @@ app.command('/create-program', async ({ command, ack, say }) => {
     });
 
     if (!response.ok) {
-      await say(`Error creating program: API returned ${response.status}`);
+      const errorBody = await response.text();
+      const errorData = JSON.parse(errorBody);
+      await say(`Error creating program - ${errorData.detail}`);
       return;
     }
 
-    await say(`Program ${programName} created successfully!`);
+    const data = await response.json();
+    const programs = Array.isArray(data) ? data : [data];
+
+    const blocks = [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: "Program Created Successfully",
+          emoji: true
+        }
+      },
+      {
+        type: "divider"
+      }
+    ];
+
+    programs.forEach(program => {
+      blocks.push({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*${program.name}*\n:hash: Channel: <#${program.slack_channel}>\n:calendar: Start: ${new Date(program.start_date).toLocaleDateString()}\n:checkered_flag: End: ${new Date(program.end_date).toLocaleDateString()}`
+        }
+      });
+    });
+
+    await say({ blocks, text: `Program ${programs[0].name} created successfully` });
   } catch (error) {
     console.error(error);
     await say(`Failed to create program: ${error.message}`);
