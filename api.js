@@ -37,9 +37,15 @@ export async function getActivities(userId) {
     return request('/activities', { method: 'GET' }, userId);
 }
 
-export async function getPrograms(userId) {
+
+export async function listPrograms(userId) {
     return request('/programs', { method: 'GET' }, userId);
 }
+
+export async function getPrograms(userId, slackChannel, name) {
+    return request(`/programs/${slackChannel}/${name}`, { method: 'GET' }, userId);
+}
+
 
 export async function createProgram(userId, payload) {
     return request('/programs', {
@@ -47,3 +53,22 @@ export async function createProgram(userId, payload) {
         body: JSON.stringify(payload)
     }, userId);
 }
+
+
+
+export async function createActivity(userId, programId, payload) {
+    return request(`/programs/${programId}/activities`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    }, userId);
+}
+
+
+export async function createUser(userId, payload) {
+    return request('/users', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    }, userId);
+}
+
+

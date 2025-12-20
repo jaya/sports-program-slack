@@ -24,6 +24,10 @@
       {
         "command": "/create-program",
         "description": "Create a new program"
+      },
+      {
+        "command": "/signup",
+        "description": "Sign up for a program"
       }
     ]
   },
@@ -33,7 +37,12 @@
         "channels:history",
         "chat:write",
         "im:history",
-        "commands"
+        "commands",
+        "app_mentions:read",
+        "channels:read",
+        "groups:read",
+        "mpim:read",
+        "im:read"
       ]
     }
   },
@@ -41,7 +50,8 @@
     "event_subscriptions": {
       "bot_events": [
         "message.channels",
-        "message.im"
+        "message.im",
+        "app_mention"
       ]
     },
     "interactivity": {
