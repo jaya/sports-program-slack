@@ -1,11 +1,14 @@
 import 'dotenv/config';
 import { App } from '@slack/bolt';
+import registerListeners from './listenners/index.js';
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN
 });
+
+registerListeners(app)
 
 import { getActivities, listPrograms, getPrograms, createProgram, createActivity, createUser } from './api.js';
 
