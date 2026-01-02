@@ -1,8 +1,7 @@
-import { listPrograms } from "../../api";
+import { listPrograms, createActivity } from "../../api.js";
 
 const appMentionedCallback = async ({ event, client, say }) => {
   try {
-    console.log(event);
     const text = event.text.replace(/^<@\w+>\s*/, '').trim();
     const dateRegex = /@(\d{1,2})\/(\d{1,2})/;
     const match = text.match(dateRegex);

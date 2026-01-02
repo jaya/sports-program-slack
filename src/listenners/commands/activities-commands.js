@@ -1,6 +1,6 @@
-import { getActivities } from "../../api";
+import { getActivities } from "../../api.js";
 
-const listActivitiesCallback = async ({ command, ack, say }) => {
+const listActivitiesCallback = async ({ command, ack, respond }) => {
   await ack();
   try {
     const data = await getActivities(command.user_id);
@@ -33,7 +33,7 @@ const listActivitiesCallback = async ({ command, ack, say }) => {
       });
     });
 
-    await say({ blocks, text: "Activities List" });
+    await respond({ blocks, text: "Activities List" });
   } catch (error) {
     const blocks = [
       {
@@ -52,7 +52,7 @@ const listActivitiesCallback = async ({ command, ack, say }) => {
         }
       }
     ];
-    await say({ blocks, text: "Error fetching activities" });
+    await respond({ blocks, text: "Error fetching activities" });
   }
 };
 

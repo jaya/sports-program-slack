@@ -1,7 +1,7 @@
-import appMentionedCallback from "./app-mentioned";
+import appMentionedCallback from "./app-mentioned.js";
 
 const register = (app) => {
-  app.command('app_mention', appMentionedCallback);
+  app.event('app_mention', appMentionedCallback);
 };
 
 export default { register };
